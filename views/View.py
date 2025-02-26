@@ -1,5 +1,8 @@
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import Combobox, Treeview
+
+from models.Database import Database
 
 
 class View(Tk):
@@ -11,6 +14,7 @@ class View(Tk):
         super().__init__() # Pärib kõik originaal Tk omadused: View(Tk)
         self.model = model
         self.__myTable = None
+        self.vsb = None
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
@@ -25,7 +29,7 @@ class View(Tk):
         self.__frame_top, self.__frame_bottom, self.__frame_right = self.create_frames()
 
         # Põhivorm
-        self.__lbl_category, self.__txt_category, self.__lbl_word, self.__txt_word = self.create_main_form()
+        self.__lbl_category, self.__txt_category, self.__lbl_word, self.__txt_word, self.__lbl_id1, self.__lbl_id2 = self.create_main_form()
 
         # Vana kategooria valik
         self.__lbl_old_categories, self.__combo_categories = self.create_combobox()
@@ -80,7 +84,12 @@ class View(Tk):
         txt_2 = Entry(self.__frame_top)
         txt_2.grid(row=2, column=1, sticky=EW)
 
-        return lbl_1, txt_1, lbl_2, txt_2
+        lbl_3 = Label(self.__frame_top, text='ID:', background='lightblue', font=('Verdana', 10, 'bold'))
+        lbl_3.grid(row=3, column=0, pady=5, sticky=EW)
+        lbl_4 = Label(self.__frame_top, text='', background='lightblue', font=('Verdana', 10, 'bold'))
+        lbl_4.grid(row=3, column=1, sticky=EW)
+
+        return lbl_1, txt_1, lbl_2, txt_2, lbl_3, lbl_4
 
     def create_buttons(self):
         """
@@ -106,7 +115,7 @@ class View(Tk):
         label.grid(row=1, column=0, pady=5, sticky=EW)
 
         combo = Combobox(self.__frame_top)
-        combo['values'] = ('Vali kategooria', 'Hooned', 'Loomad', 'Sõidukid') # Näidis
+        combo['values'] = self.model.categories
         combo.current(0)
         combo.grid(row=1, column=1, padx=4, sticky=EW)
 
@@ -119,9 +128,9 @@ class View(Tk):
         """
         self.__myTable = Treeview(self.__frame_bottom)
 
-        vsb = Scrollbar(self.__frame_bottom, orient=VERTICAL, command=self.__myTable.yview)
-        vsb.pack(side=RIGHT, fill=Y)
-        self.__myTable.configure(yscrollcommand=vsb.set)
+        self.vsb = Scrollbar(self.__frame_bottom, orient=VERTICAL, command=self.__myTable.yview)
+        self.vsb.pack(side=RIGHT, fill=Y)
+        self.__myTable.configure(yscrollcommand=self.vsb.set)
 
         self.__myTable['columns'] = ('jrk', 'id', 'word', 'category')
 
@@ -139,9 +148,48 @@ class View(Tk):
 
         # (START) Siin peaks olema andmete tabelisse lisamise või uuendamise koht
 
+        x = 0
+        db = Database()
+        info = db.read_word()
+        for row in info:
+            #jrk = x
+            x += 1
+            id = row[0]
+            word = row[1]
+            category = row[2]
+            self.__myTable.insert('', 'end', values=(x, id, word, category))
+
+
         # (LÕPP) Siin peaks olema andmete tabelisse lisamise või uuendamise koht
 
         self.__myTable.pack(fill=BOTH, expand=True)
+
+        self.__myTable.bind('<Double-1>', self.on_row_double_click)
+
+    def set_btn_add_callback(self, callback):
+        self.__btn_add.config(command=callback)
+
+    def set_btn_delete_callback(self, callback):
+        self.__btn_delete.config(command=callback)
+
+    def set_btn_edit_callback(self, callback):
+        self.__btn_edit.config(command=callback)
+
+    def on_row_double_click(self, event=None):
+        select_item = self.__myTable.selection()
+        if select_item:
+            row_values = self.__myTable.item(select_item, 'values')
+            #print(row_values[1], row_values[2], row_values[3])
+            self.__txt_word.delete(0, END)
+            self.__txt_word.insert(0, row_values[2])
+            self.__combo_categories.set(row_values[3])
+            self.__txt_category['state'] = 'disabled'
+            self.__lbl_id2['text'] = row_values[1]
+
+
+
+
+
 
     # GETTERS
 
@@ -176,3 +224,7 @@ class View(Tk):
         :return: Entry objekt
         """
         return self.__txt_word
+
+    @property
+    def get_lbl_id2(self):
+        return self.__lbl_id2
