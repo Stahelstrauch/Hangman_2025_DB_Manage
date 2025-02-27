@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 
 class Database:
-    db_name = 'databases/hangman_2025.db'
+    db_name = 'databases/hangman_2025_1.db'
     table = 'words'
 
     def __init__(self):
@@ -35,7 +35,7 @@ class Database:
             print("Attempting to create table...")
             self.cursor.execute(sql)
             self.conn.commit()
-            messagebox.showinfo('Loodi andmebaas', 'Andmebaas koos tabeliga "words" loodi projekti Hangman_2025_DB_Manage peakausta!')
+            messagebox.showinfo('Loodi andmebaas', 'Andmebaas koos tabeliga "words" loodi projekti Hangman_2025_DB_Manage databases kausta!')
         except sqlite3.OperationalError as error:
             print(f'Tabeli loomisel tekkis viga: {error}')
         finally:

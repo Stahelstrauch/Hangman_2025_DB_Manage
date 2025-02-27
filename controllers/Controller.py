@@ -47,7 +47,7 @@ class Controller:
             category = self.view.get_combo_categories.get().lower()
         else:
             category = self.view.get_txt_category.get().lower()
-        word = self.view.get_txt_word.get()
+        word = self.view.get_txt_word.get().lower()
         #print(category)
         if word and category:
             db = Database()
