@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 
 class Database:
-    db_name = 'databases/hangman_2025_1.db'
+    db_name = 'databases/hangman_2025.db'
     table = 'words'
 
     def __init__(self):
